@@ -30,23 +30,23 @@ TaikoTrainerWindow::TaikoTrainerWindow() :
 bool TaikoTrainerWindow::add_time(std::chrono::duration<double> delta_time)
 {
 
-	CircleHit hit(std::chrono::high_resolution_clock::now(), false);
+	std::shared_ptr<CircleHit> hit_pointer;
 
-	while (hits.try_pop(hit))
+	while (hit_pointer = hits.try_pop_ptr())
 	{
 		//auto circle_iterator = closest_circle(hit.time);
 		auto circle_iterator = current_frame.circles.begin();
 		if (circle_iterator == current_frame.circles.end())
 		{
-			if (hit.katsu) current_frame.message = "katsu";
+			if (hit_pointer->katsu) current_frame.message = "katsu";
 			else current_frame.message = "don";
 		}
 		else
 		{
-			std::chrono::milliseconds hit_delay = std::chrono::duration_cast<std::chrono::milliseconds>(hit.time - circle_iterator->hit_time);
+			std::chrono::milliseconds hit_delay = std::chrono::duration_cast<std::chrono::milliseconds>(hit_pointer->time - circle_iterator->hit_time);
 			if (circle_iterator->katsu)
 			{
-				if (hit.katsu)
+				if (hit_pointer->katsu)
 				{
 					BASS_ChannelPlay(katsu_hit_sound, true);
 					current_frame.message = "katsu, delay: " + std::to_string(hit_delay.count()) + "ms";
@@ -59,7 +59,7 @@ bool TaikoTrainerWindow::add_time(std::chrono::duration<double> delta_time)
 			}
 			else
 			{
-				if (hit.katsu)
+				if (hit_pointer->katsu)
 				{
 					BASS_ChannelPlay(wrong_sound, true);
 					current_frame.message = "don  , you hit katsu";

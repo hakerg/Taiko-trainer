@@ -1,4 +1,5 @@
 #pragma once
+#include <memory>
 #include <mutex>
 #include <queue>
 
@@ -68,6 +69,20 @@ namespace uc
 				return true;
 			}
 			else return false;
+		}
+
+		// returns pointer to next element or empty pointer if queue is empty
+		std::shared_ptr<_Type> try_pop_ptr()
+		{
+			std::lock_guard<std::mutex> lock(_queue_mutex);
+
+			if (_queue.size())
+			{
+				std::shared_ptr<_Type> ret = std::make_shared<_Type>(_queue.front());
+				_queue.pop();
+				return ret;
+			}
+			else return std::shared_ptr<_Type>();
 		}
 
 		// access first element
